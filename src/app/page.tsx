@@ -52,7 +52,7 @@ export default function HomePage() {
             
             <h1 
               className="text-6xl font-bold text-yellow-400 mb-4 font-mono uppercase tracking-wide glitch"
-              data-text="PIXEL SLOTS"
+              data-text="Agentic"
             >
               Agentic
             </h1>
