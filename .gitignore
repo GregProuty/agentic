@@ -1,0 +1,33 @@
+# Next.js specific
+.next/
+out/
+build/
+
+# Logs and temp files
+*.log
+tmp/
+temp/
+*.tmp
+
+# Dependency directories
+node_modules/
+
+# Environment variables file
+.env
+.env.*
+!.env.example
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE specific files (adjust as needed)
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Optional: Ignore local database files
+*.sqlite
+*.db

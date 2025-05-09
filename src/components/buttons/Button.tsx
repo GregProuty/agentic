@@ -1,8 +1,8 @@
 import { LucideIcon } from 'lucide-react';
 import * as React from 'react';
 import { IconType } from 'react-icons';
-import { ImSpinner2 } from 'react-icons/im';
 
+import { SpinnerIcon } from '@/components/icons/SpinnerIcon';
 import { cn } from '@/lib/utils';
 
 const ButtonVariant = ['primary', 'outline', 'ghost', 'light', 'dark'] as const;
@@ -13,8 +13,8 @@ type ButtonProps = {
   isDarkBg?: boolean;
   variant?: (typeof ButtonVariant)[number];
   size?: (typeof ButtonSize)[number];
-  leftIcon?: IconType | LucideIcon;
-  rightIcon?: IconType | LucideIcon;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   classNames?: {
     leftIcon?: string;
     rightIcon?: string;
@@ -31,8 +31,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'primary',
       size = 'base',
       isDarkBg = false,
-      leftIcon: LeftIcon,
-      rightIcon: RightIcon,
+      leftIcon,
+      rightIcon,
       classNames,
       ...rest
     },
@@ -110,18 +110,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               }
             )}
           >
-            <ImSpinner2 className='animate-spin' />
+            <SpinnerIcon className='animate-spin' />
           </div>
         )}
-        {LeftIcon && (
+        {leftIcon && (
           <div
             className={cn([
               size === 'base' && 'mr-1',
               size === 'sm' && 'mr-1.5',
             ])}
           >
-            <LeftIcon
-              size='1em'
+            <span
               className={cn(
                 [
                   size === 'base' && 'md:text-md text-md',
@@ -129,19 +128,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ],
                 classNames?.leftIcon
               )}
-            />
+            >
+              {leftIcon}
+            </span>
           </div>
         )}
         {children}
-        {RightIcon && (
+        {rightIcon && (
           <div
             className={cn([
               size === 'base' && 'ml-1',
               size === 'sm' && 'ml-1.5',
             ])}
           >
-            <RightIcon
-              size='1em'
+            <span
               className={cn(
                 [
                   size === 'base' && 'text-md md:text-md',
@@ -149,7 +149,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ],
                 classNames?.rightIcon
               )}
-            />
+            >
+              {rightIcon}
+            </span>
           </div>
         )}
       </button>

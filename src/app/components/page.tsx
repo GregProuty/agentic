@@ -249,31 +249,31 @@ export default function ComponentPage() {
               <div className='flex flex-wrap gap-2'>
                 <Button
                   variant='primary'
-                  leftIcon={Plus}
-                  rightIcon={ArrowRight}
+                  leftIcon={<Plus size="1em" />}
+                  rightIcon={<ArrowRight size="1em" />}
                 >
                   Icon
                 </Button>
                 <Button
                   variant='outline'
-                  leftIcon={Plus}
-                  rightIcon={ArrowRight}
+                  leftIcon={<Plus size="1em" />}
+                  rightIcon={<ArrowRight size="1em" />}
                   isDarkBg={mode === 'dark'}
                 >
                   Icon
                 </Button>
                 <Button
                   variant='ghost'
-                  leftIcon={Plus}
-                  rightIcon={ArrowRight}
+                  leftIcon={<Plus size="1em" />}
+                  rightIcon={<ArrowRight size="1em" />}
                   isDarkBg={mode === 'dark'}
                 >
                   Icon
                 </Button>
-                <Button variant='dark' leftIcon={Plus} rightIcon={ArrowRight}>
+                <Button variant='dark' leftIcon={<Plus size="1em" />} rightIcon={<ArrowRight size="1em" />}>
                   Icon
                 </Button>
-                <Button variant='light' leftIcon={Plus} rightIcon={ArrowRight}>
+                <Button variant='light' leftIcon={<Plus size="1em" />} rightIcon={<ArrowRight size="1em" />}>
                   Icon
                 </Button>
               </div>
@@ -298,16 +298,16 @@ export default function ComponentPage() {
                 <Button
                   size='sm'
                   variant='primary'
-                  leftIcon={Plus}
-                  rightIcon={ArrowRight}
+                  leftIcon={<Plus size="1em" />}
+                  rightIcon={<ArrowRight size="1em" />}
                 >
                   Icon
                 </Button>
                 <Button
                   size='sm'
                   variant='outline'
-                  leftIcon={Plus}
-                  rightIcon={ArrowRight}
+                  leftIcon={<Plus size="1em" />}
+                  rightIcon={<ArrowRight size="1em" />}
                   isDarkBg={mode === 'dark'}
                 >
                   Icon
@@ -315,8 +315,8 @@ export default function ComponentPage() {
                 <Button
                   size='sm'
                   variant='ghost'
-                  leftIcon={Plus}
-                  rightIcon={ArrowRight}
+                  leftIcon={<Plus size="1em" />}
+                  rightIcon={<ArrowRight size="1em" />}
                   isDarkBg={mode === 'dark'}
                 >
                   Icon
@@ -325,16 +325,16 @@ export default function ComponentPage() {
                 <Button
                   size='sm'
                   variant='dark'
-                  leftIcon={Plus}
-                  rightIcon={ArrowRight}
+                  leftIcon={<Plus size="1em" />}
+                  rightIcon={<ArrowRight size="1em" />}
                 >
                   Icon
                 </Button>
                 <Button
                   size='sm'
                   variant='light'
-                  leftIcon={Plus}
-                  rightIcon={ArrowRight}
+                  leftIcon={<Plus size="1em" />}
+                  rightIcon={<ArrowRight size="1em" />}
                 >
                   Icon
                 </Button>
@@ -391,11 +391,11 @@ export default function ComponentPage() {
                 Button with only icon inside
               </p>
               <div className='space-x-2'>
-                <IconButton icon={Plus} />
-                <IconButton variant='outline' icon={Laptop} />
-                <IconButton variant='ghost' icon={Phone} />
-                <IconButton variant='dark' icon={Shield} />
-                <IconButton variant='light' icon={CreditCard} />
+                <IconButton icon={<Plus size="1em" />} />
+                <IconButton variant='outline' icon={<Laptop size="1em" />} />
+                <IconButton variant='ghost' icon={<Phone size="1em" />} />
+                <IconButton variant='dark' icon={<Shield size="1em" />} />
+                <IconButton variant='light' icon={<CreditCard size="1em" />} />
               </div>
             </li>
             <li className='space-y-2'>

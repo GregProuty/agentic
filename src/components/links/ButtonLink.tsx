@@ -21,8 +21,8 @@ type ButtonLinkProps = {
   isDarkBg?: boolean;
   variant?: (typeof ButtonLinkVariant)[number];
   size?: (typeof ButtonLinkSize)[number];
-  leftIcon?: IconType | LucideIcon;
-  rightIcon?: IconType | LucideIcon;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   classNames?: {
     leftIcon?: string;
     rightIcon?: string;
@@ -37,8 +37,8 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
       variant = 'primary',
       size = 'base',
       isDarkBg = false,
-      leftIcon: LeftIcon,
-      rightIcon: RightIcon,
+      leftIcon,
+      rightIcon,
       classNames,
       ...rest
     },
@@ -99,15 +99,14 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
           className
         )}
       >
-        {LeftIcon && (
+        {leftIcon && (
           <div
             className={cn([
               size === 'base' && 'mr-1',
               size === 'sm' && 'mr-1.5',
             ])}
           >
-            <LeftIcon
-              size='1em'
+            <span
               className={cn(
                 [
                   size === 'base' && 'md:text-md text-md',
@@ -115,19 +114,20 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
                 ],
                 classNames?.leftIcon
               )}
-            />
+            >
+              {leftIcon}
+            </span>
           </div>
         )}
         {children}
-        {RightIcon && (
+        {rightIcon && (
           <div
             className={cn([
               size === 'base' && 'ml-1',
               size === 'sm' && 'ml-1.5',
             ])}
           >
-            <RightIcon
-              size='1em'
+            <span
               className={cn(
                 [
                   size === 'base' && 'text-md md:text-md',
@@ -135,7 +135,9 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
                 ],
                 classNames?.rightIcon
               )}
-            />
+            >
+              {rightIcon}
+            </span>
           </div>
         )}
       </UnstyledLink>
