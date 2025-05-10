@@ -35,6 +35,9 @@ export default function ReelStrip({
   const spinTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [finalSymbols, setFinalSymbols] = useState<string[]>([]);
   
+  // Sequential stop delay - each reel stops with a delay based on its index
+  const sequentialStopDelay = reelIndex * 1000; // 1 second delay between each reel stopping
+  
   // Create an expanded set of symbols for the scrolling effect
   useEffect(() => {
     if (symbols && Array.isArray(symbols) && symbols.length > 0) {
@@ -68,7 +71,10 @@ export default function ReelStrip({
         clearTimeout(spinTimerRef.current);
       }
       
-      // Schedule when to stop spinning
+      // Schedule when to stop spinning - adding sequential delay based on reel index
+      const totalSpinTime = spinDuration * 1000 + spinDelay + sequentialStopDelay;
+      console.log(`Reel ${reelIndex} will stop after ${totalSpinTime}ms`);
+      
       spinTimerRef.current = setTimeout(() => {
         try {
           // 1. First, we'll capture the current position from the CSS animation
@@ -117,7 +123,7 @@ export default function ReelStrip({
           controls.set({ y: -1 * symbolHeight * symbols.length });
           onSpinComplete(finalSymbols);
         }
-      }, spinDuration * 1000 + spinDelay);
+      }, totalSpinTime);
     }
     // Force stop if needed
     else if (!spinning && isSpinning) {
@@ -162,7 +168,7 @@ export default function ReelStrip({
         onSpinComplete(finalSymbols);
       }
     }
-  }, [spinning, isSpinning, spinDuration, spinDelay, symbolHeight, symbols, controls, onSpinComplete]);
+  }, [spinning, isSpinning, spinDuration, spinDelay, symbolHeight, symbols, controls, onSpinComplete, sequentialStopDelay]);
   
   // Function to get a set of random symbols for the reel when it stops spinning
   const getVisibleSymbols = useCallback((): string[] => {

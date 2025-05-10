@@ -32,14 +32,29 @@ const SYMBOL_HEIGHT = 60;
 
 // Payout multipliers for different symbol combinations
 const PAYOUTS = {
-  '👾👾👾': 15,  // Triple 👾: 15x bet
-  '🎮🎮🎮': 10,  // Triple 🎮: 10x bet
-  '👹👹👹': 20,  // Triple 👹: 20x bet
-  '🏆🏆🏆': 30,  // Triple 🏆: 30x bet (jackpot)
-  '💣💣💣': 25,  // Triple 💣: 25x bet
-  '🔮🔮🔮': 12,  // Triple 🔮: 12x bet
-  '🎲🎲🎲': 8,   // Triple 🎲: 8x bet
-  'ANY_PAIR': 2  // Any pair: 2x bet
+  '👾👾👾': 20,  // Triple 👾: 20x bet
+  '🎮🎮🎮': 15,  // Triple 🎮: 15x bet
+  '👹👹👹': 30,  // Triple 👹: 30x bet
+  '🏆🏆🏆': 70,  // Triple 🏆: 70x bet (jackpot)
+  '💣💣💣': 40,  // Triple 💣: 40x bet
+  '🔮🔮🔮': 18,  // Triple 🔮: 18x bet
+  '🎲🎲🎲': 12,  // Triple 🎲: 12x bet
+  // Left to right pairs (first two reels)
+  '👾👾-L': 2,    // Pair 👾 (leftmost two reels): 2x bet
+  '🎮🎮-L': 1.5,  // Pair 🎮 (leftmost two reels): 1.5x bet
+  '👹👹-L': 3,    // Pair 👹 (leftmost two reels): 3x bet
+  '🏆🏆-L': 4,    // Pair 🏆 (leftmost two reels): 4x bet
+  '💣💣-L': 3,    // Pair 💣 (leftmost two reels): 3x bet
+  '🔮🔮-L': 2,    // Pair 🔮 (leftmost two reels): 2x bet
+  '🎲🎲-L': 1.5,  // Pair 🎲 (leftmost two reels): 1.5x bet
+  // Right to left pairs (last two reels)
+  '👾👾-R': 2,    // Pair 👾 (rightmost two reels): 2x bet
+  '🎮🎮-R': 1.5,  // Pair 🎮 (rightmost two reels): 1.5x bet  
+  '👹👹-R': 3,    // Pair 👹 (rightmost two reels): 3x bet
+  '🏆🏆-R': 4,    // Pair 🏆 (rightmost two reels): 4x bet
+  '💣💣-R': 3,    // Pair 💣 (rightmost two reels): 3x bet
+  '🔮🔮-R': 2,    // Pair 🔮 (rightmost two reels): 2x bet
+  '🎲🎲-R': 1.5,  // Pair 🎲 (rightmost two reels): 1.5x bet
 };
 
 // At the top, add a constant for number of reels
@@ -81,26 +96,37 @@ export default function SlotMachine({ className }: SlotMachineProps) {
 
   // Update streak when game history changes
   useEffect(() => {
-    if (gameHistory.length === 0) return;
+    if (gameHistory.length === 0) {
+      // Reset streak when there's no history
+      setCurrentStreak({ count: 0, type: '' });
+      return;
+    }
     
     console.log("Game history updated:", gameHistory);
     
-    const lastGameWin = gameHistory[0].isWin;
+    // Explicitly calculate the streak from the game history
+    // Start with the most recent game (index 0)
+    const firstGameWin = gameHistory[0].isWin;
+    let streakCount = 1;
     
-    if (currentStreak.count === 0 || lastGameWin !== (currentStreak.type === 'win')) {
-      // Start new streak
-      setCurrentStreak({
-        count: 1,
-        type: lastGameWin ? 'win' : 'loss'
-      });
-    } else {
-      // Continue current streak
-      setCurrentStreak(prev => ({
-        ...prev,
-        count: prev.count + 1
-      }));
+    // Count consecutive games of the same result
+    for (let i = 1; i < gameHistory.length; i++) {
+      if (gameHistory[i].isWin === firstGameWin) {
+        streakCount++;
+      } else {
+        // Stop counting when the streak breaks
+        break;
+      }
     }
-  }, [gameHistory]);
+    
+    console.log(`Calculated streak: ${streakCount} ${firstGameWin ? 'wins' : 'losses'} in a row`);
+    
+    // Update the streak state with the calculated values
+    setCurrentStreak({
+      count: streakCount,
+      type: firstGameWin ? 'win' : 'loss'
+    });
+  }, [gameHistory]); // Only depend on gameHistory
 
   // Clean up any timers when component unmounts
   useEffect(() => {
@@ -174,7 +200,7 @@ export default function SlotMachine({ className }: SlotMachineProps) {
     }
   };
   
-  // Check for winning combinations - completely rewritten pair detection logic
+  // Check for winning combinations - revised to check both left-to-right and right-to-left
   const checkForWin = (symbols: string[]) => {
     console.log("🎮 CHECKING WIN with MIDDLE ROW symbols:", symbols.join(" | "));
     console.log("🎮 These are the PAYLINE symbols from the MIDDLE of each reel");
@@ -214,7 +240,7 @@ export default function SlotMachine({ className }: SlotMachineProps) {
     if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
       console.log("🎯 TRIPLE DETECTED in MIDDLE ROW!", symbols[0]);
       const tripleKey = `${symbols[0]}${symbols[0]}${symbols[0]}`;
-      const multiplier = PAYOUTS[tripleKey as keyof typeof PAYOUTS] || 5;
+      const multiplier = PAYOUTS[tripleKey as keyof typeof PAYOUTS] || 20;
       const winnings = wallet.currentBet * multiplier;
       
       console.log(`🎮 Triple match! ${tripleKey} with multiplier ${multiplier}`);
@@ -249,33 +275,58 @@ export default function SlotMachine({ className }: SlotMachineProps) {
       return;
     }
     
-    // STEP 2: Explicitly check each pair possibility
-    const isPair01 = symbols[0] === symbols[1];
-    const isPair12 = symbols[1] === symbols[2]; 
-    const isPair02 = symbols[0] === symbols[2];
-    
-    // Debug log each pair check for clarity
-    console.log(`🔍 Pair 0-1 check: "${symbols[0]}" vs "${symbols[1]}" => ${isPair01}`);
-    console.log(`🔍 Pair 1-2 check: "${symbols[1]}" vs "${symbols[2]}" => ${isPair12}`);
-    console.log(`🔍 Pair 0-2 check: "${symbols[0]}" vs "${symbols[2]}" => ${isPair02}`);
-    
-    // STEP 3: If any pair is found, it's a win
-    if (isPair01 || isPair12 || isPair02) {
-      console.log("🎯 PAIR DETECTED in MIDDLE ROW!");
+    // STEP 2: Check for pair on leftmost two reels (left-to-right matching)
+    if (symbols[0] === symbols[1]) {
+      console.log(`🎯 PAIR DETECTED on leftmost reels: ${symbols[0]}${symbols[1]}`);
+      const pairKey = `${symbols[0]}${symbols[0]}-L`;
+      const multiplier = PAYOUTS[pairKey as keyof typeof PAYOUTS] || 2;
+      const winnings = wallet.currentBet * multiplier;
       
-      // Log which specific pair was found
-      if (isPair01) console.log(`🎮 Matching pair at positions 0-1: ${symbols[0]}`);
-      if (isPair12) console.log(`🎮 Matching pair at positions 1-2: ${symbols[1]}`);
-      if (isPair02) console.log(`🎮 Matching pair at positions 0-2: ${symbols[0]}`);
-      
-      const winnings = wallet.currentBet * PAYOUTS['ANY_PAIR'];
-      
-      console.log(`🎮 Pair match! Multiplier ${PAYOUTS['ANY_PAIR']}`);
+      console.log(`🎮 Left pair match! ${pairKey} with multiplier ${multiplier}`);
       console.log("💰 Win amount:", winnings);
       
       // Record win in history
       const updatedHistory = [{amount: winnings, isWin: true, symbols}, ...gameHistory.slice(0, 9)];
-      console.log("📝 Updating game history with pair win:", updatedHistory);
+      console.log("📝 Updating game history with left pair win:", updatedHistory);
+      setGameHistory(updatedHistory);
+      
+      // Update win state to show win animation
+      setWin(true);
+      setWinAmount(winnings);
+      
+      // Update wallet balance
+      wallet.addToBalance(winnings);
+      playWinSound();
+      
+      // Force show the win message
+      setShowLastResult(true);
+      
+      // Update session balance
+      setSessionBalance(prev => prev + winnings);
+      
+      // Let result display for a while before clearing
+      setTimeout(() => {
+        setWin(false);
+        setWinAmount(0);
+        setShowLastResult(false);
+      }, 3000);
+      
+      return;
+    }
+    
+    // STEP 3: Check for pair on rightmost two reels (right-to-left matching)
+    if (symbols[1] === symbols[2]) {
+      console.log(`🎯 PAIR DETECTED on rightmost reels: ${symbols[1]}${symbols[2]}`);
+      const pairKey = `${symbols[1]}${symbols[1]}-R`;
+      const multiplier = PAYOUTS[pairKey as keyof typeof PAYOUTS] || 2;
+      const winnings = wallet.currentBet * multiplier;
+      
+      console.log(`🎮 Right pair match! ${pairKey} with multiplier ${multiplier}`);
+      console.log("💰 Win amount:", winnings);
+      
+      // Record win in history
+      const updatedHistory = [{amount: winnings, isWin: true, symbols}, ...gameHistory.slice(0, 9)];
+      console.log("📝 Updating game history with right pair win:", updatedHistory);
       setGameHistory(updatedHistory);
       
       // Update win state to show win animation
@@ -303,7 +354,7 @@ export default function SlotMachine({ className }: SlotMachineProps) {
     }
     
     // STEP 4: If we reach here, there's no win
-    console.log("❌ NO WIN - No pairs or triples found in MIDDLE ROW symbols:", symbols.join(","));
+    console.log("❌ NO WIN - No matching consecutive symbols found in MIDDLE ROW:", symbols.join(","));
     
     // No win - display loss
     setWin(false);
@@ -470,7 +521,7 @@ export default function SlotMachine({ className }: SlotMachineProps) {
           ))}
         </div>
         
-        {/* Current bet display - now also shows win/loss messages */}
+        {/* Current bet display - revert to original state */}
         <div className={cn(
           "bg-black py-3 px-4 mx-auto mb-4 font-mono text-center relative overflow-hidden", 
           pixelBorder,
@@ -799,12 +850,73 @@ export default function SlotMachine({ className }: SlotMachineProps) {
       <div className={cn("mt-4 max-w-md w-full bg-indigo-900 p-4", pixelBorder)}>
         <h3 className="text-yellow-400 font-mono uppercase text-center mb-2">Payout Table</h3>
         <div className="grid grid-cols-2 gap-2 text-sm font-mono">
-          {Object.entries(PAYOUTS).map(([combo, multiplier]) => (
-            <div key={combo} className="flex justify-between items-center">
-              <span className="text-white">{combo === 'ANY_PAIR' ? 'Any Pair' : combo}</span>
-              <span className="text-green-400">{multiplier}x</span>
-            </div>
-          ))}
+          <div className="col-span-2 mb-1 border-b border-gray-700 pb-1">
+            <span className="text-yellow-400">Triple Combinations</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">🏆🏆🏆</span>
+            <span className="text-green-400">70x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">💣💣💣</span>
+            <span className="text-green-400">40x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">👹👹👹</span>
+            <span className="text-green-400">30x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">👾👾👾</span>
+            <span className="text-green-400">20x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">🔮🔮🔮</span>
+            <span className="text-green-400">18x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">🎮🎮🎮</span>
+            <span className="text-green-400">15x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">🎲🎲🎲</span>
+            <span className="text-green-400">12x</span>
+          </div>
+          
+          <div className="col-span-2 mt-2 mb-1 border-b border-gray-700 pb-1">
+            <span className="text-yellow-400">Pair Combinations</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">🏆🏆</span>
+            <span className="text-green-400">4x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">💣💣</span>
+            <span className="text-green-400">3x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">👹👹</span>
+            <span className="text-green-400">3x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">👾👾</span>
+            <span className="text-green-400">2x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">🔮🔮</span>
+            <span className="text-green-400">2x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">🎮🎮</span>
+            <span className="text-green-400">1.5x</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white">🎲🎲</span>
+            <span className="text-green-400">1.5x</span>
+          </div>
+          
+          <div className="col-span-2 mt-2 text-xs text-gray-400 text-center">
+            Pairs can be either left-to-right or right-to-left!
+          </div>
         </div>
       </div>
     </div>
